@@ -27,7 +27,6 @@ async function query(filterBy = {}) {
 
 async function getById(carId) {
     try {
-        console.log('AAAAA',carId)
         const collection = await dbService.getCollection('cars')
         const car = await collection.findOne({ '_id': ObjectId(carId) })
         return car
@@ -155,7 +154,7 @@ function _buildCriteria(filterBy) {
     }
     const years = filterBy.years.split(',').map(x=>+x);
     criteria.year = { $gt: years[0], $lte: years[1] }
-    console.log(criteria)
+    //console.log(criteria)
     return criteria
 }
 

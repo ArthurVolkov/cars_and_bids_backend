@@ -20,7 +20,6 @@ async function getCars(req, res) {
 
 async function getCar(req, res) {
     try {
-        console.log('BBBBBBBBBB')
         const car = await carService.getById(req.params.id)
         ////////////////////////////////////////////
         // setTimeout(() => { 
@@ -71,8 +70,6 @@ async function addReview(req, res) {
     try {
         const review = req.body
         review.owner = req.session.user.fullname
-        console.log('review:', review)
-        // console.log('req.session.user:', req.session.user)
         const savedReview = await carService.addReview(review)
         res.send(savedReview)
 
