@@ -10,9 +10,9 @@ async function query(filterBy = {}) {
     try {
         const collection = await dbService.getCollection('cars')
         if (filterBy.sortBy === 'ending-soon'){
-            var sortBy = { 'auction.createdAt' : -1 }    
+            var sortBy = { 'auction.createdAt' : 1 }    
         } else if (filterBy.sortBy === 'newly-listed') {
-            sortBy = { 'auction.createdAt' : 1 }        
+            sortBy = { 'auction.createdAt' : -1 }        
         } else if (filterBy.sortBy === 'lowest-mileage') {
             sortBy = { 'mileage' : 1 }
         }
