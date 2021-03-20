@@ -14,7 +14,6 @@ async function login(req, res) {
 }
 
 function getUser(req, res) {
-    console.log('PPPPPPPPPPPPPP',req.session.user)
     if (!req.session.user) return res.json(null)
     res.send(req.session.user)
 }
