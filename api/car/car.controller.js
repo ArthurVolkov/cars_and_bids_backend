@@ -20,7 +20,6 @@ async function getCars(req, res) {
 
 async function getCar(req, res) {
     try {
-        console.log('BBBBBBBBBB')
         const car = await carService.getById(req.params.id)
         ////////////////////////////////////////////
         // setTimeout(() => { 
@@ -66,20 +65,44 @@ async function addCar(req, res) {
         res.status(500).send({ err: 'Failed to add car' })
     }
 }
- 
-async function addReview(req, res) {
-    try {
-        const review = req.body
-        review.owner = req.session.user.fullname
-        console.log('review:', review)
-        // console.log('req.session.user:', req.session.user)
-        const savedReview = await carService.addReview(review)
-        res.send(savedReview)
 
-    } catch (err) {
-        logger.error('Failed to add review', err)
-        res.status(500).send({ err: 'Failed to add review' })
+async function addComment(req, res) {
+    const userId = req.session.user._id
+    const user = await userService.getById(userId)
+    console.log('AAAAAAAAAAA',user)
+    var comment = req.body
+    console.log(comment)
+    comment.id = _makeId();
+    comment.by = {}
+    comment.by._id = user._id;
+    comment.by.fullname = user.fullname
+    comment.by.imgUrl = user.imgUrl;  
+    comment.createdAt = Date.now();
+    const car = await carService.addComment(comment)
+    res.send(car)
+}
+ 
+async function addBid(req, res) {
+    const userId = req.session.user._id
+    const user = await userService.getById(userId)
+    var bid = req.body
+    bid.id = _makeId();
+    bid.by = {}
+    bid.by._id = user._id;
+    bid.by.fullname = user.fullname
+    bid.by.imgUrl = user.imgUrl;  
+    bid.createdAt = Date.now();
+    const car = await carService.addBid(bid)
+    res.send(car)
+}
+
+function _makeId(length = 5) {
+    var txt = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (var i = 0; i < length; i++) {
+        txt += possible.charAt(Math.floor(Math.random() * possible.length));
     }
+    return txt;
 }
 
 module.exports = {
@@ -88,5 +111,6 @@ module.exports = {
     deleteCar,
     addCar,
     updateCar,
-    addReview
+    addComment,
+    addBid
 }

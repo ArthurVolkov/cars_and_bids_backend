@@ -27,7 +27,6 @@ async function query(filterBy = {}) {
 
 async function getById(carId) {
     try {
-        console.log('AAAAA',carId)
         const collection = await dbService.getCollection('cars')
         const car = await collection.findOne({ '_id': ObjectId(carId) })
         return car
@@ -47,6 +46,22 @@ async function remove(carId) {
     }
 }
 
+async function addComment(comment) {
+    const _id = ObjectId(comment.carId)
+    delete comment.carId
+    const collection = await dbService.getCollection('cars')
+    await collection.updateOne({ '_id': _id }, { $push: {'comments': comment }})
+    return comment;    
+}
+
+async function addBid(bid) {
+    const _id = ObjectId(bid.carId)
+    delete bid.carId
+    const collection = await dbService.getCollection('cars')
+    await collection.updateOne({ '_id': _id }, { $push: {'auction.bids': bid }})
+    return bid;    
+}
+
 async function update(car) {
     try {
         // peek only updatable fields!
@@ -58,7 +73,7 @@ async function update(car) {
             inStock: car.inStock,
             reviews: car.reviews || []
         }
-        const collection = await dbService.getCollection('car')
+        const collection = await dbService.getCollection('cars')
         await collection.updateOne({ '_id': carToSave._id }, { $set: carToSave })
         return carToSave;
     } catch (err) {
@@ -89,29 +104,14 @@ async function add(car) {
     }
 }
 
-async function addReview(review) {
-    console.log('review:', review)
-    review._id = _makeId()
-    try {
-        // const car = await getById(review.carId)
-        // console.log('car:', car)
-        // if (!car.reviews) car.reviews = []
-        // car.reviews.push(review)
-        // await update(car)
-        // return review
-    } catch (err) {
-        logger.error('Cannot insert review', err)
-        throw err
-    }
-}
-
 module.exports = {
     query,
     remove,
     add,
     getById,
     update,
-    addReview
+    addComment,
+    addBid
 }
 
 function _buildCriteria(filterBy) {
@@ -155,7 +155,7 @@ function _buildCriteria(filterBy) {
     }
     const years = filterBy.years.split(',').map(x=>+x);
     criteria.year = { $gt: years[0], $lte: years[1] }
-    console.log(criteria)
+    //console.log(criteria)
     return criteria
 }
 
