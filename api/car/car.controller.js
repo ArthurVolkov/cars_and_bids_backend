@@ -56,9 +56,16 @@ async function updateCar(req, res) {
 
 async function addCar(req, res) {
     try {
+        const userId = req.session.user._id
+        const user = await userService.getById(userId)
         const car = req.body
-        const savedUser = await carService.add(car)
-        res.send(savedUser)
+        car.owner = {}
+        car.owner._id = user._id;
+        car.owner.fullname = user.fullname
+        car.owner.imgUrl = user.imgUrl;      
+        car.auction.createdAt = Date.now();
+        const savedCar = await carService.add(car)
+        res.send(savedCar)
 
     } catch (err) {
         logger.error('Failed to add car', err)
@@ -69,9 +76,7 @@ async function addCar(req, res) {
 async function addComment(req, res) {
     const userId = req.session.user._id
     const user = await userService.getById(userId)
-    console.log('AAAAAAAAAAA',user)
     var comment = req.body
-    console.log(comment)
     comment.id = _makeId();
     comment.by = {}
     comment.by._id = user._id;
