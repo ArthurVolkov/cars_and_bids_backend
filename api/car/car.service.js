@@ -62,6 +62,18 @@ async function addBid(bid) {
     return bid;    
 }
 
+async function add(car) {
+    try {
+        const collection = await dbService.getCollection('cars')
+        await collection.insertOne(car)
+        return car;
+    } catch (err) {
+        logger.error('cannot insert car', err)
+        throw err
+    }
+}
+
+
 async function update(car) {
     try {
         // peek only updatable fields!
@@ -78,28 +90,6 @@ async function update(car) {
         return carToSave;
     } catch (err) {
         logger.error(`Cannot update car ${car._id}`, err)
-        throw err
-    }
-}
-
-async function add(car) {
-    try {
-        // peek only updatable fields!
-        const carToAdd = car
-        // {
-            // name: car.name,
-            // price: car.price,
-            // type: car.type,
-            // createdAt: Date.now(),
-            // inStock: true
-        // }
-        //console.log('HAHA',car)
-
-        const collection = await dbService.getCollection('cars')
-        await collection.insertOne(carToAdd)
-        return carToAdd;
-    } catch (err) {
-        logger.error('cannot insert car', err)
         throw err
     }
 }
