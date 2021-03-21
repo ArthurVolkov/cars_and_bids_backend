@@ -117,7 +117,8 @@ async function addLike(req, res) {
 
 async function removeLike(req, res) {
     try {
-        await carService.removeLike(req.params.carId,req.params.id)
+        console.log('PPPPPPPPPPPPPP')
+        await carService.removeLike(req.params.id)
         res.send({ msg: 'Deleted successfully' })
     } catch (err) {
         logger.error('Failed to delete car', err)

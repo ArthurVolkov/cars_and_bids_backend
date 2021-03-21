@@ -17,6 +17,6 @@ router.post('/bid', addBid)
 router.post('/like', addLike)
 router.post('/', addCar)
 router.delete('/:id', requireAuth, requireAdmin, deleteCar)
-router.delete('/like/:carId/:id', requireAuth, removeLike)
+router.delete('/like/:id', removeLike)
 
 module.exports = router
