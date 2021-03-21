@@ -111,14 +111,13 @@ async function addLike(req, res) {
     like.by.fullname = user.fullname
     like.by.imgUrl = user.imgUrl;  
     like.createdAt = Date.now();
-    const car = await carService.addLike(like)
-    res.send(car)
+    like = await carService.addLike(like)
+    res.send(like)
 }
 
 async function removeLike(req, res) {
     try {
-        console.log('PPPPPPPPPPPPPP')
-        await carService.removeLike(req.params.id)
+        await carService.removeLike(req.params.id,req.session.user._id)
         res.send({ msg: 'Deleted successfully' })
     } catch (err) {
         logger.error('Failed to delete car', err)

@@ -70,17 +70,13 @@ async function addLike(like) {
     return like;    
 }
 
-async function removeLike(carId) {
-    console.log('CAR ID:',carId)
-    console.log('USER ID:',req.session.user._id)
+async function removeLike(carId,userId) {
 
     const _id = ObjectId(carId)
-    const userId = ObjectId(req.session.user._id)
-    console.log('CAR ID:',_id)
-    console.log('USER ID:',userId)
+    const uId = ObjectId(userId)
     const collection = await dbService.getCollection('cars')
-    await collection.updateOne({ '_id': _id }, { $pull: {'likes': {'by._id':userId }}})
-    return like;    
+    await collection.updateOne({ '_id': _id }, { $pull: {'likes': {'by._id': uId }}})
+    return carId;    
 }
 
 async function add(car) {
