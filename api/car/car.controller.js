@@ -101,6 +101,30 @@ async function addBid(req, res) {
     res.send(car)
 }
 
+async function addLike(req, res) {
+    const userId = req.session.user._id
+    const user = await userService.getById(userId)
+    var like = req.body
+    like.id = _makeId();
+    like.by = {}
+    like.by._id = user._id;
+    like.by.fullname = user.fullname
+    like.by.imgUrl = user.imgUrl;  
+    like.createdAt = Date.now();
+    const car = await carService.addLike(like)
+    res.send(car)
+}
+
+async function removeLike(req, res) {
+    try {
+        await carService.removeLike(req.params.carId,req.params.id)
+        res.send({ msg: 'Deleted successfully' })
+    } catch (err) {
+        logger.error('Failed to delete car', err)
+        res.status(500).send({ err: 'Failed to delete car' })
+    }
+}
+
 function _makeId(length = 5) {
     var txt = '';
     var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -117,5 +141,7 @@ module.exports = {
     addCar,
     updateCar,
     addComment,
-    addBid
+    addBid,
+    addLike,
+    removeLike
 }

@@ -62,6 +62,21 @@ async function addBid(bid) {
     return bid;    
 }
 
+async function addLike(like) {
+    const _id = ObjectId(like.carId)
+    delete like.carId
+    const collection = await dbService.getCollection('cars')
+    await collection.updateOne({ '_id': _id }, { $push: {'comments': like }})
+    return like;    
+}
+
+async function removeLike(carId,likeId) {
+    const _id = ObjectId(carId)
+    const collection = await dbService.getCollection('cars')
+    await collection.updateOne({ '_id': _id }, { $pull: {'likes': {'id':likeId }}})
+    return like;    
+}
+
 async function add(car) {
     try {
         const collection = await dbService.getCollection('cars')
@@ -101,7 +116,9 @@ module.exports = {
     getById,
     update,
     addComment,
-    addBid
+    addBid,
+    addLike,
+    removeLike
 }
 
 function _buildCriteria(filterBy) {
