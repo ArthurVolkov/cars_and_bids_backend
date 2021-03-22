@@ -20,7 +20,19 @@ async function query(filterBy = {}) {
         var count = await collection.count()
         return [cars, count]
     } catch (err) {
-        logger.error('Cannot find car', err)
+        logger.error('Cannot find cars', err)
+        throw err
+    }
+}
+
+async function queryUserCars(userId = '') {
+    const criteria = _buildUserCriteria(userId)
+    try {
+        const collection = await dbService.getCollection('cars')
+        var cars = await collection.find(criteria).toArray()
+        return cars
+    } catch (err) {
+        logger.error('Cannot find users cars', err)
         throw err
     }
 }
@@ -32,16 +44,6 @@ async function getById(carId) {
         return car
     } catch (err) {
         logger.error(`Error while finding car ${carId}`, err)
-        throw err
-    }
-}
-
-async function remove(carId) {
-    try {
-        const collection = await dbService.getCollection('car')
-        await collection.deleteOne({ '_id': ObjectId(carId) })
-    } catch (err) {
-        logger.error(`Cannot remove car ${carId}`, err)
         throw err
     }
 }
@@ -71,7 +73,6 @@ async function addLike(like) {
 }
 
 async function removeLike(carId,userId) {
-
     const _id = ObjectId(carId)
     const uId = ObjectId(userId)
     const collection = await dbService.getCollection('cars')
@@ -90,33 +91,11 @@ async function add(car) {
     }
 }
 
-
-async function update(car) {
-    try {
-        // peek only updatable fields!
-        const carToSave = {
-            _id: ObjectId(car._id),
-            name: car.name,
-            price: car.price,
-            type: car.type,
-            inStock: car.inStock,
-            reviews: car.reviews || []
-        }
-        const collection = await dbService.getCollection('cars')
-        await collection.updateOne({ '_id': carToSave._id }, { $set: carToSave })
-        return carToSave;
-    } catch (err) {
-        logger.error(`Cannot update car ${car._id}`, err)
-        throw err
-    }
-}
-
 module.exports = {
     query,
-    remove,
+    queryUserCars,
     add,
     getById,
-    update,
     addComment,
     addBid,
     addLike,
@@ -168,15 +147,26 @@ function _buildCriteria(filterBy) {
     return criteria
 }
 
-
-
-
-function _makeId(length = 8) {
-    var txt = ''
-    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-    for (var i = 0; i < length; i++) {
-        txt += possible.charAt(Math.floor(Math.random() * possible.length))
+function _buildUserCriteria(userId) {
+    const criteria = {}
+    if (userId) {
+        const userCriteria = { $eq: ObjectId(userId) }
+        criteria.$or = [
+            {
+                [owner._id]: userCriteria
+            },
+            {
+                [likes.by._id]: userCriteria
+            },
+            {
+                [auction.bids.by._id]: userCriteria
+            },
+            {
+                [comments.by._id]: userCriteria
+            }
+        ]
     }
-    return txt
+    return criteria
 }
+
 

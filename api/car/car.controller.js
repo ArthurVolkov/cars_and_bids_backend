@@ -4,53 +4,30 @@ const carService = require('./car.service')
 
 async function getCars(req, res) {
     try {
-        // console.log('req.query:', req.query)
         const responce = await carService.query(req.query)
-        /////////////////////////////////////////////
-        // setTimeout(() => { 
             res.send(responce)
-        // }, 500);
-        /////////////////////////////////////////////
     } catch (err) {
         logger.error('Cannot get responce (cars)', err)
         res.status(500).send({ err: 'Failed to get responce (cars)' })
     }
 }
 
-
 async function getCar(req, res) {
     try {
         const car = await carService.getById(req.params.id)
-        ////////////////////////////////////////////
-        // setTimeout(() => { 
             res.send(car)
-        // }, 500);
-        ///////////////////////////////////////////
     } catch (err) {
         logger.error('Failed to get car', err)
         res.status(500).send({ err: 'Failed to get car' })
     }
 }
-
-async function deleteCar(req, res) {
+async function getUserCars(req, res) {
     try {
-        await carService.remove(req.params.id)
-        res.send({ msg: 'Deleted successfully' })
+        const responce = await carService.queryUserCars(req.query)
+        res.send(responce)
     } catch (err) {
-        logger.error('Failed to delete car', err)
-        res.status(500).send({ err: 'Failed to delete car' })
-    }
-}
-
-
-async function updateCar(req, res) {
-    try {
-        const car = req.body
-        const savedCar = await carService.update(car)
-        res.send(savedCar)
-    } catch (err) {
-        logger.error('Failed to update car', err)
-        res.status(500).send({ err: 'Failed to update car' })
+        logger.error('Cannot get responce (userCars)', err)
+        res.status(500).send({ err: 'Failed to get responce (userCars)' })
     }
 }
 
@@ -63,7 +40,7 @@ async function addCar(req, res) {
         car.owner._id = user._id;
         car.owner.fullname = user.fullname
         car.owner.imgUrl = user.imgUrl;      
-        car.auction.createdAt = Date.now();
+        car.auction.createdAt = Date.now() - 604800000 + 1000*60*60*24*_getRandomInt(1,7);
         const savedCar = await carService.add(car)
         res.send(savedCar)
 
@@ -125,6 +102,10 @@ async function removeLike(req, res) {
     }
 }
 
+function _getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 function _makeId(length = 5) {
     var txt = '';
     var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -137,9 +118,8 @@ function _makeId(length = 5) {
 module.exports = {
     getCars,
     getCar,
-    deleteCar,
+    getUserCars,
     addCar,
-    updateCar,
     addComment,
     addBid,
     addLike,
