@@ -1,7 +1,6 @@
-
-
 const asyncLocalStorage = require('./als.service');
 const logger = require('./logger.service');
+const toyService = require('../api/car/car.service')
 
 var gIo = null
 var gSocketBySessionIdMap = {}
@@ -15,6 +14,7 @@ function connectSockets(http, session) {
         autoSave: true
     }));
     gIo.on('connection', socket => {
+        console.log('CONNECTED')
         // console.log('socket.handshake', socket.handshake)
         gSocketBySessionIdMap[socket.handshake.sessionID] = socket
         // TODO: emitToUser feature - need to tested for CaJan21
@@ -26,6 +26,7 @@ function connectSockets(http, session) {
             }
         })
         socket.on('chat topic', topic => {
+            console.log(topic)
             if (socket.myTopic === topic) return;
             if (socket.myTopic) {
                 socket.leave(socket.myTopic)
@@ -35,25 +36,30 @@ function connectSockets(http, session) {
             socket.myTopic = topic
         })
         socket.on('chat newMsg', msg => {
-            console.log('chat newMsg msg:', msg)
+            console.log(msg)
+            console.log(socket.myTopic)
+            msg.toyId = socket.myTopic;
+            toyService.addMsg(msg)            
             // emits to all sockets:
             // gIo.emit('chat addMsg', msg)
             // emits only to sockets in the same room
-            console.log('socket.myTopic:', socket.myTopic)
             gIo.to(socket.myTopic).emit('chat addMsg', msg)
         })
-        socket.on('chat typing', typing => {
-            console.log('chat typing:', typing)
+        socket.on('typing', msg => {
             // emits to all sockets:
             // gIo.emit('chat addMsg', msg)
             // emits only to sockets in the same room
-            gIo.to(socket.myTopic).emit('chat user-typing', typing)
-            // socket.to(socket.myTopic).broadcast('chat user-typing', typing)
 
-
-            // gIo.to(socket.myTopic).emit('chat user-typing', isTyping)
+            socket.broadcast.to(socket.myTopic).emit('is typing', msg)
         })
+        socket.on('admin change', msg => {
+            console.log('HHHHEEEE')
+            // emits to all sockets:
+            // gIo.emit('chat addMsg', msg)
+            // emits only to sockets in the same room
 
+            gIo.emit('admin', msg)
+        })
     })
 }
 

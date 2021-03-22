@@ -27,6 +27,7 @@ async function query(filterBy = {}) {
 
 async function queryUserCars(userId = '') {
     const criteria = _buildUserCriteria(userId)
+    console.log('XXXXXXXX',criteria)
     try {
         const collection = await dbService.getCollection('cars')
         var cars = await collection.find(criteria).toArray()
@@ -150,21 +151,23 @@ function _buildCriteria(filterBy) {
 function _buildUserCriteria(userId) {
     const criteria = {}
     if (userId) {
-        const userCriteria = { $eq: ObjectId(userId) }
+        userId = ObjectId(userId)
         criteria.$or = [
             {
-                [owner._id]: userCriteria
+                'owner._id': userId
             },
             {
-                [likes.by._id]: userCriteria
+                'likes.by._id': userId
             },
             {
-                [auction.bids.by._id]: userCriteria
+                'auction.bids.by._id': userId
             },
             {
-                [comments.by._id]: userCriteria
+                'comments.by._id': userId
             }
         ]
+        console.log(userId)
+        console.log('AAAAAAAAAAAAAAAAAAAAAA')
     }
     return criteria
 }
