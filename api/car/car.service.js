@@ -82,6 +82,20 @@ async function removeLike(carId,userId) {
     return carId;    
 }
 
+async function addMsg(msg) {
+    try {
+        const _id = msg._id;
+        delete msg._id;
+
+        const collection = await dbService.getCollection('cars')
+        await collection.updateOne({"_id":ObjectId(_id)}, {$push : {msgs: msg}})
+        return msg
+    } catch (err) {
+        console.log(`ERROR: cannot update toy ${toy._id}`)
+        throw err;
+    }
+}
+
 async function add(car) {
     try {
         const collection = await dbService.getCollection('cars')
@@ -101,7 +115,8 @@ module.exports = {
     addComment,
     addBid,
     addLike,
-    removeLike
+    removeLike,
+    addMsg
 }
 
 function _buildCriteria(filterBy) {
