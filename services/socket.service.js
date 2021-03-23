@@ -1,6 +1,6 @@
 const asyncLocalStorage = require('./als.service');
 const logger = require('./logger.service');
-const toyService = require('../api/car/car.service')
+const carService = require('../api/car/car.service')
 
 var gIo = null
 var gSocketBySessionIdMap = {}
@@ -26,32 +26,52 @@ function connectSockets(http, session) {
             }
         })
         socket.on('details topic', topic => {
-            console.log('Topic before:',topic)
+            console.log('Topic before:',socket.myTopic,topic)
             if (socket.myTopic === topic) return;
             if (socket.myTopic) {
+                console.log('Leaving...')
                 socket.leave(socket.myTopic)
             }
             socket.join(topic)
             // logger.debug('Session ID is', socket.handshake.sessionID)
             socket.myTopic = topic
-            console.log('Topic after:',topic)
         })
         socket.on('details newBid', bid => {
-            console.log('BID befor:',bid)
             socket.broadcast.to(socket.myTopic).emit('details addBid', bid)
-            console.log('BID after:',bid)
-            //            gIo.to(socket.myTopic).emit('chat addMsg', msg)
+            var msg = {};
+            msg._id = socket.myTopic;
+            carService.getById(msg._id)
+                .then (car => {
+                    msg.carId = car._id
+                    msg.vendor = car.vendor
+                    msg.year = car.year
+                    msg.model = car.model
+                    msg.type = 'bid';
+                    msg.data = bid.price + '';
+                    msg.createdAt = bid.createdAt;
+                    msg.by = bid.by
+                    console.log('LLLLLLLLLL',msg)        
+                    carService.addMsg(msg)            
+                    gIo.emit('cars newMsg', msg)        
+                }) 
         })
-        socket.on('details newComment', comment => {
+        socket.on('details newComment', function(comment) {
             socket.broadcast.to(socket.myTopic).emit('details addComment', comment)
-//            gIo.to(socket.myTopic).emit('chat addMsg', msg)
-        })
-        socket.on('typing', msg => {
-            // emits to all sockets:
-            // gIo.emit('chat addMsg', msg)
-            // emits only to sockets in the same room
-
-            socket.broadcast.to(socket.myTopic).emit('is typing', msg)
+            var msg = {};
+            msg._id = socket.myTopic;
+            carService.getById(msg._id)
+                .then (car => {
+                    msg.carId = car._id
+                    msg.vendor = car.vendor
+                    msg.year = car.year
+                    msg.model = car.model
+                    msg.type = 'comment';
+                    msg.data = comment.txt;
+                    msg.createdAt = comment.createdAt;
+                    msg.by = comment.by        
+                    carService.addMsg(msg)            
+                    gIo.emit('cars newMsg', msg)        
+                }) 
         })
         socket.on('admin change', msg => {
             console.log('HHHHEEEE')
