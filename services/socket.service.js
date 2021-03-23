@@ -25,8 +25,8 @@ function connectSockets(http, session) {
                 gSocketBySessionIdMap[socket.handshake.sessionID] = null
             }
         })
-        socket.on('chat topic', topic => {
-            console.log(topic)
+        socket.on('details topic', topic => {
+            console.log('Topic before:',topic)
             if (socket.myTopic === topic) return;
             if (socket.myTopic) {
                 socket.leave(socket.myTopic)
@@ -34,16 +34,17 @@ function connectSockets(http, session) {
             socket.join(topic)
             // logger.debug('Session ID is', socket.handshake.sessionID)
             socket.myTopic = topic
+            console.log('Topic after:',topic)
         })
-        socket.on('chat newMsg', msg => {
-            console.log(msg)
-            console.log(socket.myTopic)
-            msg.toyId = socket.myTopic;
-            toyService.addMsg(msg)            
-            // emits to all sockets:
-            // gIo.emit('chat addMsg', msg)
-            // emits only to sockets in the same room
-            gIo.to(socket.myTopic).emit('chat addMsg', msg)
+        socket.on('details newBid', bid => {
+            console.log('BID befor:',bid)
+            socket.broadcast.to(socket.myTopic).emit('details addBid', bid)
+            console.log('BID after:',bid)
+            //            gIo.to(socket.myTopic).emit('chat addMsg', msg)
+        })
+        socket.on('details newComment', comment => {
+            socket.broadcast.to(socket.myTopic).emit('details addComment', comment)
+//            gIo.to(socket.myTopic).emit('chat addMsg', msg)
         })
         socket.on('typing', msg => {
             // emits to all sockets:
