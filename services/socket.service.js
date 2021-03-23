@@ -1,7 +1,6 @@
-
-
 const asyncLocalStorage = require('./als.service');
 const logger = require('./logger.service');
+const toyService = require('../api/car/car.service')
 
 var gIo = null
 var gSocketBySessionIdMap = {}
@@ -15,6 +14,7 @@ function connectSockets(http, session) {
         autoSave: true
     }));
     gIo.on('connection', socket => {
+        console.log('CONNECTED')
         // console.log('socket.handshake', socket.handshake)
         gSocketBySessionIdMap[socket.handshake.sessionID] = socket
         // TODO: emitToUser feature - need to tested for CaJan21
@@ -25,7 +25,8 @@ function connectSockets(http, session) {
                 gSocketBySessionIdMap[socket.handshake.sessionID] = null
             }
         })
-        socket.on('chat topic', topic => {
+        socket.on('details topic', topic => {
+            console.log('Topic before:',topic)
             if (socket.myTopic === topic) return;
             if (socket.myTopic) {
                 socket.leave(socket.myTopic)
@@ -33,27 +34,33 @@ function connectSockets(http, session) {
             socket.join(topic)
             // logger.debug('Session ID is', socket.handshake.sessionID)
             socket.myTopic = topic
+            console.log('Topic after:',topic)
         })
-        socket.on('chat newMsg', msg => {
-            console.log('chat newMsg msg:', msg)
+        socket.on('details newBid', bid => {
+            console.log('BID befor:',bid)
+            socket.broadcast.to(socket.myTopic).emit('details addBid', bid)
+            console.log('BID after:',bid)
+            //            gIo.to(socket.myTopic).emit('chat addMsg', msg)
+        })
+        socket.on('details newComment', comment => {
+            socket.broadcast.to(socket.myTopic).emit('details addComment', comment)
+//            gIo.to(socket.myTopic).emit('chat addMsg', msg)
+        })
+        socket.on('typing', msg => {
             // emits to all sockets:
             // gIo.emit('chat addMsg', msg)
             // emits only to sockets in the same room
-            console.log('socket.myTopic:', socket.myTopic)
-            gIo.to(socket.myTopic).emit('chat addMsg', msg)
+
+            socket.broadcast.to(socket.myTopic).emit('is typing', msg)
         })
-        socket.on('chat typing', typing => {
-            console.log('chat typing:', typing)
+        socket.on('admin change', msg => {
+            console.log('HHHHEEEE')
             // emits to all sockets:
             // gIo.emit('chat addMsg', msg)
             // emits only to sockets in the same room
-            gIo.to(socket.myTopic).emit('chat user-typing', typing)
-            // socket.to(socket.myTopic).broadcast('chat user-typing', typing)
 
-
-            // gIo.to(socket.myTopic).emit('chat user-typing', isTyping)
+            gIo.emit('admin', msg)
         })
-
     })
 }
 
