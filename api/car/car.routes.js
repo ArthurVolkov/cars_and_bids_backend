@@ -10,12 +10,12 @@ const router = express.Router()
 // router.use(requireAuth)
 
 router.get('/', log, getCars)
-router.get('/user/:id', getUserCars)
+router.get('/user/:id?', getUserCars)
 router.get('/:id', getCar)
+router.post('/', addCar)
 router.post('/comment', addComment)
 router.post('/bid', addBid)
 router.post('/like', addLike)
-router.post('/', addCar)
 router.delete('/like/:id', removeLike)
 
 module.exports = router

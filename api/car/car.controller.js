@@ -14,7 +14,6 @@ async function getCars(req, res) {
 
 async function getCar(req, res) {
     try {
-        console.log('PPPPPPPPPP')
         const car = await carService.getById(req.params.id)
             res.send(car)
     } catch (err) {
@@ -54,8 +53,6 @@ async function addCar(req, res) {
 async function addComment(req, res) {
     const userId = req.session.user._id
     const user = await userService.getById(userId)
-    console.log('user from session:', req.session.user._id)
-    console.log('user from function:' ,user._id)
     var comment = req.body
     comment.id = _makeId();
     comment.by = {}

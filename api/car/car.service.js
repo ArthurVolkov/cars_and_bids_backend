@@ -27,7 +27,6 @@ async function query(filterBy = {}) {
 
 async function queryUserCars(userId = '') {
     const criteria = _buildUserCriteria(userId)
-    console.log('XXXXXXXX',criteria)
     try {
         const collection = await dbService.getCollection('cars')
         var cars = await collection.find(criteria).toArray()
@@ -69,7 +68,7 @@ async function addLike(like) {
     const _id = ObjectId(like.carId)
     delete like.carId
     const collection = await dbService.getCollection('cars')
-    await collection.updateOne({ '_id': _id }, { $push: {'likes': like }})
+    await collection.updateOne({ _id }, { $push: {'likes': like }})
     return like;    
 }
 
@@ -120,7 +119,6 @@ module.exports = {
 
 function _buildCriteria(filterBy) {
     const criteria = {}
-    //console.log(filterBy)
     if (filterBy.name) {
         const txtCriteria = { $regex: filterBy.name, $options: 'i' }
         criteria.$or = [
@@ -159,7 +157,6 @@ function _buildCriteria(filterBy) {
     }
     const years = filterBy.years.split(',').map(x=>+x);
     criteria.year = { $gt: years[0], $lte: years[1] }
-    //console.log(criteria)
     return criteria
 }
 
@@ -181,8 +178,6 @@ function _buildUserCriteria(userId) {
                 'comments.by._id': userId
             }
         ]
-        console.log(userId)
-        console.log('AAAAAAAAAAAAAAAAAAAAAA')
     }
     return criteria
 }

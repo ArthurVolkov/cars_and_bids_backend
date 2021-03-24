@@ -15,10 +15,7 @@ function connectSockets(http, session) {
     }));
     gIo.on('connection', socket => {
         console.log('CONNECTED')
-        // console.log('socket.handshake', socket.handshake)
         gSocketBySessionIdMap[socket.handshake.sessionID] = socket
-        // TODO: emitToUser feature - need to tested for CaJan21
-        // if (socket.handshake?.session?.user) socket.join(socket.handshake.session.user._id)
         socket.on('disconnect', socket => {
             console.log('Someone disconnected')
             if (socket.handshake) {
@@ -26,14 +23,12 @@ function connectSockets(http, session) {
             }
         })
         socket.on('details topic', topic => {
-            console.log('Topic before:',socket.myTopic,topic)
             if (socket.myTopic === topic) return;
             if (socket.myTopic) {
                 console.log('Leaving...')
                 socket.leave(socket.myTopic)
             }
             socket.join(topic)
-            // logger.debug('Session ID is', socket.handshake.sessionID)
             socket.myTopic = topic
         })
         socket.on('details newBid', bid => {
@@ -50,7 +45,6 @@ function connectSockets(http, session) {
                     msg.data = bid.price + '';
                     msg.createdAt = bid.createdAt;
                     msg.by = bid.by
-                    console.log('LLLLLLLLLL',msg)        
                     carService.addMsg(msg)            
                     gIo.emit('cars newMsg', msg)        
                 }) 
@@ -74,22 +68,24 @@ function connectSockets(http, session) {
                 }) 
         })
         socket.on('details newLike', function(like) {
-            socket.broadcast.to(socket.myTopic).emit('details changeLike', like)
-            var msg = {};
-            msg._id = socket.myTopic;
-            carService.getById(msg._id)
-                .then (car => {
-                    msg.carId = car._id
-                    msg.vendor = car.vendor
-                    msg.year = car.year
-                    msg.model = car.model
-                    msg.type = 'like';
-                    msg.data = 'true';
-                    msg.createdAt = like.createdAt;
-                    msg.by = like.by        
-                    carService.addMsg(msg)            
-                    gIo.emit('cars newMsg', msg)        
-                }) 
+            socket.broadcast.to(like.carId).emit('details changeLike', like)
+            if (like.isAdd) {
+                var msg = {};
+                msg._id = like.carId;
+                carService.getById(msg._id)
+                    .then (car => {
+                        msg.carId = car._id
+                        msg.vendor = car.vendor
+                        msg.year = car.year
+                        msg.model = car.model
+                        msg.type = 'like';
+                        msg.data = 'true';
+                        msg.createdAt = like.createdAt;
+                        msg.by = like.by        
+                        carService.addMsg(msg)            
+                        gIo.emit('cars newMsg', msg)        
+                    }) 
+            }
         })
         socket.on('details newCar', function(car) {
             var msg = {};
@@ -104,14 +100,6 @@ function connectSockets(http, session) {
             msg.by = car.owner        
             carService.addMsg(msg)            
             gIo.emit('cars newMsg', msg)        
-        })
-        socket.on('admin change', msg => {
-            console.log('HHHHEEEE')
-            // emits to all sockets:
-            // gIo.emit('chat addMsg', msg)
-            // emits only to sockets in the same room
-
-            gIo.emit('admin', msg)
         })
     })
 }
