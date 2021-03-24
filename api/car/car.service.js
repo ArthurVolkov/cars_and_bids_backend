@@ -17,6 +17,7 @@ async function query(filterBy = {}) {
             sortBy = { 'mileage' : 1 }
         }
         var cars = await collection.find(criteria).sort(sortBy).skip(skip).limit(limit).toArray()
+        console.log('cars:', cars)
         var count = await collection.count()
         return [cars, count]
     } catch (err) {

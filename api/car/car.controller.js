@@ -33,9 +33,12 @@ async function getUserCars(req, res) {
 
 async function addCar(req, res) {
     try {
+        console.log('YYYYYYYY',req)
         const userId = req.session.user._id
         const user = await userService.getById(userId)
         const car = req.body
+        console.log('XXXXXXX',car)
+
         car.owner = {}
         car.owner._id = user._id;
         car.owner.fullname = user.fullname
