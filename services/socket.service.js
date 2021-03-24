@@ -73,6 +73,38 @@ function connectSockets(http, session) {
                     gIo.emit('cars newMsg', msg)        
                 }) 
         })
+        socket.on('details newLike', function(like) {
+            socket.broadcast.to(socket.myTopic).emit('details changeLike', like)
+            var msg = {};
+            msg._id = socket.myTopic;
+            carService.getById(msg._id)
+                .then (car => {
+                    msg.carId = car._id
+                    msg.vendor = car.vendor
+                    msg.year = car.year
+                    msg.model = car.model
+                    msg.type = 'like';
+                    msg.data = 'true';
+                    msg.createdAt = like.createdAt;
+                    msg.by = like.by        
+                    carService.addMsg(msg)            
+                    gIo.emit('cars newMsg', msg)        
+                }) 
+        })
+        socket.on('details newCar', function(car) {
+            var msg = {};
+            msg._id = car._id;
+            msg.carId = car._id
+            msg.vendor = car.vendor
+            msg.year = car.year
+            msg.model = car.model
+            msg.type = 'car';
+            msg.data = '';
+            msg.createdAt = car.auction.createdAt;
+            msg.by = car.owner        
+            carService.addMsg(msg)            
+            gIo.emit('cars newMsg', msg)        
+        })
         socket.on('admin change', msg => {
             console.log('HHHHEEEE')
             // emits to all sockets:
