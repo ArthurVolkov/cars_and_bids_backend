@@ -33,20 +33,32 @@ async function getUserCars(req, res) {
 
 async function addCar(req, res) {
     try {
-        console.log('YYYYYYYY',req)
-        const userId = req.session.user._id
-        const user = await userService.getById(userId)
+        console.log('GGGGGGGGGGGGGGG',req.body)
         const car = req.body
-        console.log('XXXXXXX',car)
-
-        car.owner = {}
-        car.owner._id = user._id;
-        car.owner.fullname = user.fullname
-        car.owner.imgUrl = user.imgUrl;      
-        car.auction.createdAt = Date.now() - 604800000 + 1000*60*60*24*_getRandomInt(1,7);
-        const savedCar = await carService.add(car)
-        res.send(savedCar)
-
+        if (!car.fake) {
+            const userId = req.session.user._id
+            const user = await userService.getById(userId)    
+            car.owner = {}
+            car.owner._id = user._id;
+            car.owner.fullname = user.fullname
+            car.owner.imgUrl = user.imgUrl;      
+            car.auction.createdAt = Date.now()
+            const savedCar = await carService.add(car)
+            res.send(savedCar)
+        }   
+        else {
+            car.comments = []
+            car.likes = []
+            car.msgs = []    
+            car.auction = {}
+            car.auction.startPrice = _getRandomInt(20000, 40000)
+            car.auction.status = 'active',
+            car.auction.duration = 1000 * 60 * 60 * 24 * 7,
+            car.auction.bids = []
+            car.auction.createdAt = Date.now() - 1000*60*60*24*6 - 1000*60*60*_getRandomInt(1,23);
+            const savedCar = await carService.add(car)
+            res.send(savedCar)
+        }
     } catch (err) {
         logger.error('Failed to add car', err)
         res.status(500).send({ err: 'Failed to add car' })

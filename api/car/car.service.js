@@ -90,7 +90,7 @@ async function addMsg(msg) {
         await collection.updateOne({"_id":ObjectId(_id)}, {$push : {msgs: msg}})
         return msg
     } catch (err) {
-        console.log(`ERROR: cannot update toy ${toy._id}`)
+        console.log(`ERROR: cannot update toy ${_id}`)
         throw err;
     }
 }
