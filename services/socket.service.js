@@ -2,6 +2,32 @@ const asyncLocalStorage = require('./als.service');
 const logger = require('./logger.service');
 const carService = require('../api/car/car.service')
 
+checkTimeLeft()
+
+function checkTimeLeft() {
+    var timeLeftInterval = setInterval(() => {
+        carService.query().then (data => {   
+        const cars = data[0];
+        cars.forEach(car => { 
+            if (car.auction.createdAt + car.auction.duration - Date.now() < 0 &&
+                !car.informed) {
+                    carService.updateInformed(car).then (res => {
+                    emit({type: 'cars time', data: car})
+                })
+            }
+            if (car.auction.createdAt + car.auction.duration - Date.now() < -1000*30 &&
+                car.auction.status === 'active' ) {
+                    carService.updateStatus(car)
+            }
+            if (car.auction.createdAt + car.auction.duration - Date.now() < -1000*60 &&
+                car.auction.status === 'not active' ) {
+                    carService.update(car)
+            }   
+        });
+        })
+    }, 3000);
+}
+
 var gIo = null
 var gSocketBySessionIdMap = {}
 
@@ -32,9 +58,10 @@ function connectSockets(http, session) {
             socket.myTopic = topic
         })
         socket.on('details newBid', bid => {
-            socket.broadcast.to(socket.myTopic).emit('details addBid', bid)
+            socket.broadcast.emit('details addBid', bid)
+            //.to(socket.myTopic)
             var msg = {};
-            msg._id = socket.myTopic;
+            msg._id = bid.carId;
             carService.getById(msg._id)
                 .then (car => {
                     msg.carId = car._id
@@ -50,9 +77,9 @@ function connectSockets(http, session) {
                 }) 
         })
         socket.on('details newComment', function(comment) {
-            socket.broadcast.to(socket.myTopic).emit('details addComment', comment)
+            socket.broadcast.emit('details addComment', comment)
             var msg = {};
-            msg._id = socket.myTopic;
+            msg._id = comment.carId;
             carService.getById(msg._id)
                 .then (car => {
                     msg.carId = car._id
@@ -68,7 +95,7 @@ function connectSockets(http, session) {
                 }) 
         })
         socket.on('details newLike', function(like) {
-            socket.broadcast.to(like.carId).emit('details changeLike', like)
+            socket.broadcast.emit('details changeLike', like)
             if (like.isAdd) {
                 var msg = {};
                 msg._id = like.carId;

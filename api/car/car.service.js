@@ -17,7 +17,7 @@ async function query(filterBy = {}) {
             sortBy = { 'mileage' : 1 }
         }
         var cars = await collection.find(criteria).sort(sortBy).skip(skip).limit(limit).toArray()
-        console.log('cars:', cars)
+//        console.log('cars:', cars)
         var count = await collection.count()
         return [cars, count]
     } catch (err) {
@@ -106,16 +106,71 @@ async function add(car) {
     }
 }
 
+async function updateInformed(car) {
+    try {
+        console.log('UPDATE',car)
+        const collection = await dbService.getCollection('cars')
+        await collection.updateOne({"_id":ObjectId(car._id)}, {$set : {informed : true}})
+        return car
+    } catch (err) {
+        console.log(`ERROR: cannot update car ${car._id}`)
+        throw err;
+    }
+}
+
+async function updateStatus(car) {
+    try {
+        const collection = await dbService.getCollection('cars')
+        await collection.updateOne({"_id":ObjectId(car._id)}, {$set : {'auction.status' : 'not active'}})
+        return car
+    } catch (err) {
+        console.log(`ERROR: cannot update car ${car._id}`)
+        throw err;
+    }
+}
+
+async function remove(carId) {
+    try {
+        const collection = await dbService.getCollection('cars')
+        return await collection.deleteOne({ "_id": ObjectId(carId) })
+    } catch (err) {
+        console.log(`ERROR: cannot remove toy ${carId}`)
+        throw err;
+    }
+}
+
+async function update(car) {
+    try {
+        car.informed = false
+        car.auction.status = 'active'
+        car.auction.createdAt = Date.now() - 1000*60*60*24*6 - 1000*60*60*16 - 1000*60*_getRandomInt(1,59);
+        const collection = await dbService.getCollection('cars')
+        await collection.updateOne({"_id":ObjectId(car._id)}, {$set : car})
+        return car
+    } catch (err) {
+        console.log(`ERROR: cannot update car ${car._id}`)
+        throw err;
+    }
+}
+
+function _getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 module.exports = {
     query,
     queryUserCars,
     add,
+    remove,
+    update,
     getById,
     addComment,
     addBid,
     addLike,
     removeLike,
-    addMsg
+    addMsg,
+    updateInformed,
+    updateStatus
 }
 
 function _buildCriteria(filterBy) {
@@ -156,8 +211,10 @@ function _buildCriteria(filterBy) {
         const vendors = filterBy.vendors.split(',')
         criteria.vendor = { $in: vendors }
     }
-    const years = filterBy.years.split(',').map(x=>+x);
-    criteria.year = { $gt: years[0], $lte: years[1] }
+    if (filterBy.year) {
+        const years = filterBy.years.split(',').map(x=>+x);
+        criteria.year = { $gt: years[0], $lte: years[1] }
+    }
     return criteria
 }
 
