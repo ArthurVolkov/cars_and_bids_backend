@@ -33,7 +33,6 @@ async function getUserCars(req, res) {
 
 async function addCar(req, res) {
     try {
-        console.log('GGGGGGGGGGGGGGG',req.body)
         const car = req.body
         if (!car.fake) {
             const userId = req.session.user._id
@@ -43,6 +42,7 @@ async function addCar(req, res) {
             car.owner.fullname = user.fullname
             car.owner.imgUrl = user.imgUrl;      
             car.auction.createdAt = Date.now()
+            car.informed = false
             const savedCar = await carService.add(car)
             res.send(savedCar)
         }   
@@ -55,7 +55,8 @@ async function addCar(req, res) {
             car.auction.status = 'active',
             car.auction.duration = 1000 * 60 * 60 * 24 * 7,
             car.auction.bids = []
-            car.auction.createdAt = Date.now() - 1000*60*60*24*6 - 1000*60*60*_getRandomInt(1,23);
+            car.auction.createdAt = Date.now() - 1000*60*60*24*6 - 1000*60*60*23 - 1000*60*_getRandomInt(55,59);
+            car.informed = false
             const savedCar = await carService.add(car)
             res.send(savedCar)
         }
