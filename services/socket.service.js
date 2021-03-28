@@ -11,6 +11,7 @@ function checkTimeLeft() {
         cars.forEach(car => { 
             if (car.auction.createdAt + car.auction.duration - Date.now() < 0 &&
                 !car.informed) {
+                    console.log('car xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:', car)
                     carService.updateInformed(car).then (res => {
                     emit({type: 'cars time', data: car})
                 })
