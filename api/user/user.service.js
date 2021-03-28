@@ -9,6 +9,7 @@ module.exports = {
     getByUsername,
     remove,
     update,
+    updateLogin,
     add
 }
 
@@ -93,7 +94,8 @@ async function add(user) {
             fullname: user.fullname,
             imgUrl: user.imgUrl,
             isAdmin: false,
-            createdAt: Date.now()
+            createdAt: Date.now(),
+            logins: []
         }
         const collection = await dbService.getCollection('users')
         await collection.insertOne(userToAdd)
@@ -102,6 +104,14 @@ async function add(user) {
         logger.error('cannot insert user', err)
         throw err
     }
+}
+
+async function updateLogin(user) {
+    const _id = ObjectId(user._id)
+    const now = Date.now()
+    const collection = await dbService.getCollection('users')
+    await collection.updateOne({ '_id': _id }, { $push: {'logins': now }})
+    return user;    
 }
 
 function _buildCriteria(filterBy) {
