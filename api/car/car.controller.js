@@ -2,7 +2,6 @@ const logger = require('../../services/logger.service')
 const userService = require('../user/user.service')
 const carService = require('./car.service')
 
-
 async function getCars(req, res) {
     try {
         const responce = await carService.query(req.query)
@@ -48,6 +47,7 @@ async function addCar(req, res) {
             res.send(savedCar)
         }   
         else {
+            car.owner = await _makeRandomUser()
             car.comments = []
             car.likes = []
             car.msgs = []    
@@ -130,6 +130,21 @@ function _makeId(length = 5) {
         txt += possible.charAt(Math.floor(Math.random() * possible.length));
     }
     return txt;
+}
+
+async function _makeRandomUser() {
+    var users = await userService.query();
+    const idx = _makeRandomInt(0, users.length - 1);
+    var minimalUser = {
+        _id: users[idx]._id,
+        fullname: users[idx].fullname,
+        imgUrl: users[idx].imgUrl
+    }
+    return minimalUser
+}
+
+function _makeRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 module.exports = {
