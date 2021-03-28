@@ -31,6 +31,7 @@ async function queryUserCars(userId = '') {
     try {
         const collection = await dbService.getCollection('cars')
         var cars = await collection.find(criteria).toArray()
+        console.log(cars)
         return cars
     } catch (err) {
         logger.error('Cannot find users cars', err)
@@ -237,6 +238,7 @@ function _buildUserCriteria(userId) {
             }
         ]
     }
+    // console.log(criteria)
     return criteria
 }
 
