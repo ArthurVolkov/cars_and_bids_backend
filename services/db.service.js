@@ -8,6 +8,7 @@ module.exports = {
 
 // Database Name
 const dbName = 'cars&bids'
+// const dbName = 'carsbids'
 
 var dbConn = null
 
