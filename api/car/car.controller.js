@@ -67,6 +67,12 @@ async function addCar(req, res) {
     }
 }
 
+async function addTime(req, res) {
+    const carId = req.body
+    await carService.addTime(carId)
+    res.send(carId)
+}
+
 async function addComment(req, res) {
     const userId = req.session.user._id
     const user = await userService.getById(userId)
@@ -155,5 +161,6 @@ module.exports = {
     addComment,
     addBid,
     addLike,
-    removeLike
+    removeLike,
+    addTime
 }

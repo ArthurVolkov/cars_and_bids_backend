@@ -130,6 +130,18 @@ async function updateStatus(car) {
     }
 }
 
+async function addTime(carId) {
+    try {
+        const time = Date.now() - 1000*60*60*24*7 + 1000*60*3
+        const collection = await dbService.getCollection('cars')
+        await collection.updateOne({"_id":ObjectId(carId)}, {$set : {'auction.createdAt' : time}})
+        return carId
+    } catch (err) {
+        console.log(`ERROR: cannot update car ${carId}`)
+        throw err;
+    }
+}
+
 async function remove(carId) {
     try {
         const collection = await dbService.getCollection('cars')
@@ -171,7 +183,8 @@ module.exports = {
     removeLike,
     addMsg,
     updateInformed,
-    updateStatus
+    updateStatus,
+    addTime
 }
 
 function _buildCriteria(filterBy) {
