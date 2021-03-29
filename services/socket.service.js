@@ -8,12 +8,9 @@ function checkTimeLeft() {
     var timeLeftInterval = setInterval(() => {
         carService.query().then (data => {   
         const cars = data[0];
-        // console.log('JJJJJJJJJJJJJJ',cars[9].auction.createdAt + cars[9].auction.duration - Date.now())
-        // console.log(cars.length)
         cars.forEach(car => { 
             if ((car.auction.createdAt + car.auction.duration - Date.now()) < 0 &&
                 car.informed === false) {
-                    // console.log('car xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx:', car)
                     carService.updateInformed(car).then (res => {
                     emit({type: 'cars time', data: car})
                 })
