@@ -17,7 +17,6 @@ async function query(filterBy = {}) {
             sortBy = { 'mileage' : 1 }
         }
         var cars = await collection.find(criteria).sort(sortBy).skip(skip).limit(limit).toArray()
-//        console.log('cars:', cars)
         var count = await collection.count()
         return [cars, count]
     } catch (err) {
@@ -31,7 +30,6 @@ async function queryUserCars(userId = '') {
     try {
         const collection = await dbService.getCollection('cars')
         var cars = await collection.find(criteria).toArray()
-        console.log(cars)
         return cars
     } catch (err) {
         logger.error('Cannot find users cars', err)
@@ -229,8 +227,6 @@ function _buildCriteria(filterBy) {
         const years = filterBy.years.split(',').map(x=>+x);
         criteria.year = { $gt: years[0], $lte: years[1] }
     }
-    // console.log(filterBy)
-    // console.log(criteria)   
     return criteria
 }
 
@@ -253,7 +249,6 @@ function _buildUserCriteria(userId) {
             }
         ]
     }
-    // console.log(criteria)
     return criteria
 }
 
