@@ -68,7 +68,8 @@ async function addCar(req, res) {
 }
 
 async function addTime(req, res) {
-    const carId = req.body
+    const carId = req.body.carId
+    console.log('req:', req)
     await carService.addTime(carId)
     res.send(carId)
 }
