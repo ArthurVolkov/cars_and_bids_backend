@@ -225,10 +225,12 @@ function _buildCriteria(filterBy) {
         const vendors = filterBy.vendors.split(',')
         criteria.vendor = { $in: vendors }
     }
-    if (filterBy.year) {
+    if (filterBy.years) {
         const years = filterBy.years.split(',').map(x=>+x);
         criteria.year = { $gt: years[0], $lte: years[1] }
     }
+    // console.log(filterBy)
+    // console.log(criteria)   
     return criteria
 }
 
