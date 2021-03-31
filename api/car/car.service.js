@@ -130,7 +130,7 @@ async function updateStatus(car) {
 
 async function addTime(carId) {
     try {
-        const time = Date.now() - 1000*60*60*24*7 + 1000*60*3
+        const time = Date.now() - 1000*60*60*24*7 + 1000*60*2.5
         const collection = await dbService.getCollection('cars')
         await collection.updateOne({"_id":ObjectId(carId)}, {$set : {'auction.createdAt' : time}})
         await collection.updateOne({ '_id':ObjectId(carId)}, { $pull: {'auction.bids': {'by._id': ObjectId('60607cd990d8be4f102cb8ab') }}})
